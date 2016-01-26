@@ -347,6 +347,9 @@ class Cache(object):
             self.cache.delete_many(fetch_keys[-1])
             return fname, None
 
+        # Mangle keys before using in the backend
+        fetch_keys = list(map(lambda k: hashlib.md5(k.encode()).hexdigest(), fetch_keys))
+
         version_data_list = list(self.cache.get_many(*fetch_keys))
         dirty = False
 
