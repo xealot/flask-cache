@@ -618,6 +618,23 @@ class CacheTestCase(unittest.TestCase):
             k = make_template_fragment_key("fragment4", vary_on=["fragment5"])
             assert self.cache.get(k) == somevar
             assert output == somevar
+            
+        def test_21_memoized_custom_repr(self):
+            with self.app.test_request_context():
+                class SlowClass(object):
+                    @self.cache.memoize()
+                    def slow_func(self, a, b):
+                        return a + b, random.randrange(0, 100000)
+    
+                    def __repr__(self):
+                        return "A SLOW CLASS"
+    
+                sc = SlowClass()
+                result_a, rand_a = sc.slow_func(1, 2)
+                assert(result_a == 3)
+                result_b, rand_b = sc.slow_func(1, 2)
+                assert(result_b == 3)
+                assert(rand_a == rand_b)
 
 
 if 'TRAVIS' in os.environ:
